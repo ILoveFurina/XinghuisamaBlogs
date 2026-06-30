@@ -11,14 +11,13 @@ export type Project = {
 
 export const projectsData: Project[] = [
   {
-    "id": "proj_1775049332705",
-    "name": "Computational Chemistry Tool",
-    "githubUrl": "https://github.com/heiehiehi/Computational_Chemistry_Tool",
-    "description": "该工具本作者使用在Win下的WSL2平台，系统为Ubuntu22，个人使用请依据自己数据进行修改（这些工具只是整合了一些流程）",
+    "id": "proj_1782786072871",
+    "name": "Furfly-Code",
+    "githubUrl": "https://github.com/ILoveFurina/Furfly-Code",
+    "description": "终端里的 AI 编程助手。Python 实现，支持 Anthropic / OpenAI 多协议 LLM，带工具调用（读写文件、执行命令、搜索代码）与流式 TUI。inspired by Claude Code。",
     "icon": "🚀",
     "tags": [
-      "Gromacs",
-      "RMSF"
+      "Python"
     ]
-  },
+  }
 ];

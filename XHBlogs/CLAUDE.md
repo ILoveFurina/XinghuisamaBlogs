@@ -9,3 +9,5 @@ rm -rf .next
 ```
 
 否则旧缓存会导致改动不生效或出现诡异 bug。如果还有问题，再清理 `node_modules/.cache`。
+## git commit要求
+采用git convention规范
