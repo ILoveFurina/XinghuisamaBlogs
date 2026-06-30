@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# runtime / generated
+/public/backend_config.json
+
+# draft posts (timestamped, created programmatically)
+/posts/post_*.md
