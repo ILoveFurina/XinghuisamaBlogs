@@ -68,21 +68,25 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  const navLinks = [
-    { name: '首页', href: '/' },
-    { name: '项目', href: '/projects' },
-    { name: '归档', href: '/timeline' },
-    { name: '照片墙', href: '/photowall' },
-    { name: '音乐', href: '/music' },
-    { name: '灵境', href: '/tree' },
-    { name: '说说', href: '/moments' },
-    { name: '杂谈', href: '/chatter' },
-    { name: '友链', href: '/friends' },
-    { name: '关于', href: '/about' },
+  // 🌟 顶栏导航项：从 siteConfig 读取，过滤出 enabled 项，顺序即数组顺序
+  // 降级：siteConfig.navItems 缺失或为空时回退到默认列表，保证顶栏不会空白
+  const DEFAULT_NAV_LINKS = [
+    { id: 'home', name: '首页', href: '/', enabled: true },
+    { id: 'projects', name: '项目', href: '/projects', enabled: true },
+    { id: 'timeline', name: '归档', href: '/timeline', enabled: true },
+    { id: 'photowall', name: '照片墙', href: '/photowall', enabled: true },
+    { id: 'music', name: '音乐', href: '/music', enabled: true },
+    { id: 'moments', name: '说说', href: '/moments', enabled: true },
+    { id: 'chatter', name: '杂谈', href: '/chatter', enabled: true },
+    { id: 'tree', name: '🌳 灵境', href: '/tree', enabled: true },
+    { id: 'friends', name: '友链', href: '/friends', enabled: true },
+    { id: 'about', name: '关于', href: '/about', enabled: true },
   ];
+  const rawNavLinks = siteConfig.navItems && siteConfig.navItems.length > 0 ? siteConfig.navItems : DEFAULT_NAV_LINKS;
+  const navLinks = rawNavLinks.filter((link: any) => link.enabled);
 
   // 🌟 核心：过滤掉“灵境”，专供手机端使用，保证圆盘自动重新均匀排布
-  const mobileNavLinks = navLinks.filter(link => link.href !== '/tree');
+  const mobileNavLinks = navLinks.filter((link: any) => link.href !== '/tree');
 
   return (
     <>
@@ -99,7 +103,7 @@ export default function Navbar() {
             {navLinks.map((link) => {
               const isActive = pathname === link.href || pathname === `${link.href}/`;
               return (
-                <Link key={link.href} href={link.href} className={`relative py-1 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-200 hover:text-indigo-600'}`}>
+                <Link key={link.id} href={link.href} className={`relative py-1 transition-colors ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-200 hover:text-indigo-600'}`}>
                   {link.name}
                   {isActive && <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-500 rounded-full animate-pulse"></span>}
                 </Link>
@@ -170,7 +174,7 @@ export default function Navbar() {
 
                     return (
                       <div
-                        key={link.href}
+                        key={link.id}
                         className="absolute top-1/2 left-1/2 w-14 h-14 -ml-7 -mt-7 flex items-center justify-center"
                         style={{
                           transform: `rotate(${angle}deg) translateY(-115px) rotate(${-angle}deg)`

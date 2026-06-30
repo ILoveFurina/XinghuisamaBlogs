@@ -68,4 +68,18 @@ export const siteConfig = {
   },
   friendLinkApplyFormat: "名称：XingHuiSamaの宝藏之地\n简介：今天我也要学习吗\n链接：https://www.xinghuisama.top\n头像：https://bu.dusays.com/2026/03/24/69c1e38ac1846.jpg",
   enableLevelSystem: true,
+
+  // 👇 【新增】：前台顶栏导航项编排（顺序即数组顺序，enabled 控制是否显示）
+  navItems: [
+    { "id": "home", "name": "首页", "href": "/", "enabled": true },
+    { "id": "projects", "name": "项目", "href": "/projects", "enabled": true },
+    { "id": "timeline", "name": "归档", "href": "/timeline", "enabled": true },
+    { "id": "photowall", "name": "照片墙", "href": "/photowall", "enabled": true },
+    { "id": "music", "name": "音乐", "href": "/music", "enabled": true },
+    { "id": "moments", "name": "说说", "href": "/moments", "enabled": true },
+    { "id": "chatter", "name": "杂谈", "href": "/chatter", "enabled": true },
+    { "id": "tree", "name": "🌳 灵境", "href": "/tree", "enabled": true },
+    { "id": "friends", "name": "友链", "href": "/friends", "enabled": true },
+    { "id": "about", "name": "关于", "href": "/about", "enabled": true }
+  ],
 };

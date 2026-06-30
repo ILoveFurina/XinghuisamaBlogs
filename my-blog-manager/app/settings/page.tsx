@@ -19,6 +19,8 @@ import DanmakuSection from '../../components/settings/DanmakuSection';
 import FooterSection from '../../components/settings/FooterSection';
 // 👇 🌟 引入刚写的 AI 配置组件
 import AICatSection from '../../components/settings/AICatSection';
+// 👇 🌟 引入顶栏导航编排组件
+import NavSection from '../../components/settings/NavSection';
 
 function SettingsContent() {
   const { operations, addOperation } = useOperations();
@@ -49,7 +51,9 @@ function SettingsContent() {
       systemPrompt: '',
       maxOutputTokens: 150,
       temperature: 0.85
-    }
+    },
+    // 👇 🌟 初始化顶栏导航项（顺序即数组顺序，enabled 控制是否显示）
+    navItems: [...(siteConfig.navItems || [])]
   });
 
   const [queryLoading, setQueryLoading] = useState(false);
@@ -77,7 +81,9 @@ function SettingsContent() {
             icpConfig: data.data.icpConfig || prev.icpConfig,
             footerBadges: data.data.footerBadges ? [...data.data.footerBadges] : prev.footerBadges,
             // 👇 🌟 合并后端发来的小猫配置
-            geminiConfig: { ...(prev.geminiConfig || {}), ...(data.data.geminiConfig || {}) }
+            geminiConfig: { ...(prev.geminiConfig || {}), ...(data.data.geminiConfig || {}) },
+            // 👇 🌟 合并后端发来的顶栏导航项（降级：后端没返回时保留本地默认）
+            navItems: data.data.navItems ? [...data.data.navItems] : prev.navItems
           }));
         } else {
           console.error("❌ 后端返回失败:", data.message);
@@ -194,6 +200,7 @@ function SettingsContent() {
     { id: 'danmaku', name: '全站弹幕设置', icon: '⚡' },
     { id: 'comment', name: '评论系统配置', icon: '💬' },
     { id: 'aicat', name: 'AI 煤球配置', icon: '🐾' }, // 👈 新增的小猫设置
+    { id: 'navbar', name: '顶栏导航设置', icon: '🧭' }, // 👈 新增的顶栏导航编排
     { id: 'repo', name: '项目仓库设置', icon: '🚀' },
   ];
 
@@ -235,6 +242,9 @@ function SettingsContent() {
               {activeTab === 'comment' && <CommentSection key="comment" formData={formData} handleUpdate={handleUpdate} pushToQueue={pushToQueue} />}
               {/* 👇 🌟 挂载 AI 猫咪面板 */}
               {activeTab === 'aicat' && <AICatSection key="aicat" formData={formData} handleUpdate={handleUpdate} pushToQueue={pushToQueue} />}
+
+              {/* 👇 🌟 挂载顶栏导航编排面板 */}
+              {activeTab === 'navbar' && <NavSection key="navbar" formData={formData} handleUpdate={handleUpdate} pushToQueue={pushToQueue} />}
 
               {activeTab === 'repo' && <RepoSection key="repo" />}
             </AnimatePresence>

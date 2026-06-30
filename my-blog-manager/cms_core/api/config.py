@@ -83,6 +83,16 @@ def get_site_config():
 
                 parsed_config[dict_name] = sub_dict
 
+        # 🌟 1.5 提取顶栏导航项数组（对象数组，顶层正则无法处理）
+        nav_match = re.search(r'navItems\s*:\s*(\[[\s\S]+?\])\s*,', content)
+        if nav_match:
+            try:
+                parsed_config['navItems'] = json.loads(nav_match.group(1))
+            except Exception as e:
+                print(f"⚠️ navItems 解析失败: {e}")
+            # 从根内容中剔除，防止下面的通用正则误抓数组里的零散数据
+            root_content = re.sub(r'navItems\s*:\s*\[[\s\S]+?\],?', '', root_content)
+
         # 2. 🌟 核心升级：提取外层基础变量（现在支持 字符串、布尔值、数字！）
         for match in re.finditer(r'([a-zA-Z0-9_]+)\s*:\s*(?:(["\'])([\s\S]*?)\2|(true|false|\d+))', root_content):
             key = match.group(1)
@@ -128,7 +138,8 @@ def update_site_config(payload: Dict[str, Any] = Body(...)):
         "navSuffix",
         "navAfter",
         "friendLinkApplyFormat",
-        "enableLevelSystem" # 👈 你加的字段在这里，完美！
+        "enableLevelSystem", # 👈 你加的字段在这里，完美！
+        "navItems" # 👈 前台顶栏导航项编排
     }
 
     try:

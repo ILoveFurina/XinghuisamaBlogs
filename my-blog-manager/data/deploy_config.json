@@ -1,7 +1,7 @@
 {
-  "blogPath": "D:\\DEVC++\\XinghuisamaBlogs\\XHBlogs",
+  "blogPath": "E:\\project\\pj\\XinghuisamaBlogs",
   "staticRepoUrl": "",
   "staticBranch": "gh-pages",
-  "sourceRepoUrl": "",
+  "sourceRepoUrl": "git@github.com:ILoveFurina/MyBlog.git",
   "sourceBranch": "main"
 }
