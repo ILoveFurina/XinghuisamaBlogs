@@ -90,6 +90,7 @@ export default function FriendsBoard() {
         key={isImgToolOpen ? 'tool-open' : 'tool-closed'}
         isOpen={isImgToolOpen}
         onClose={() => setIsImgToolOpen(false)}
+        aspectRatio={1}
         onInsert={(url) => {
           setFriendModal(prev => ({ ...prev, data: { ...prev.data, avatar: url } }));
           setIsImgToolOpen(false);

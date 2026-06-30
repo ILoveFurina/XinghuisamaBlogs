@@ -7,6 +7,7 @@ import MomentComments from '../../components/MomentComments';
 import { useToast } from '../../components/ToastProvider';
 import { siteConfig } from '../../siteConfig';
 import { useOperations } from '../../context/OperationContext';
+import ImageCropper from '../../components/editor/ImageCropper';
 
 function timeAgo(dateStr: string) {
   const date = new Date(dateStr);
@@ -35,8 +36,29 @@ export default function MomentList({ moments, authorName, avatarUrl }: any) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [imageUrlInput, setImageUrlInput] = useState('');
 
+  // 多图顺序裁剪队列
+  const [cropQueue, setCropQueue] = useState<File[]>([]);
+  const [cropIndex, setCropIndex] = useState(0);
+  const [croppedBlobs, setCroppedBlobs] = useState<Blob[]>([]);
+  const [cropSrc, setCropSrc] = useState('');
+  const cropSrcRef = useRef<string>('');
+
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // 当前要裁剪的图：进入新索引时创建 object URL，离开时回收
+  useEffect(() => {
+    if (cropQueue.length === 0) { setCropSrc(''); return; }
+    const file = cropQueue[cropIndex];
+    if (!file) { setCropSrc(''); return; }
+    if (cropSrcRef.current) URL.revokeObjectURL(cropSrcRef.current);
+    const url = URL.createObjectURL(file);
+    cropSrcRef.current = url;
+    setCropSrc(url);
+    return () => {
+      if (cropSrcRef.current) { URL.revokeObjectURL(cropSrcRef.current); cropSrcRef.current = ''; }
+    };
+  }, [cropQueue, cropIndex]);
 
   const processedMoments = useMemo(() => {
     let baseMoments = moments ? [...moments] : [];
@@ -80,19 +102,58 @@ export default function MomentList({ moments, authorName, avatarUrl }: any) {
     setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.images.length) % lightbox.images.length });
   };
 
-  const handleFileUpload = async (files: FileList | File[]) => {
+  // 选/拖图后，过滤出图片并进入顺序裁剪队列
+  const handleFileUpload = (files: FileList | File[]) => {
+    const arr = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (arr.length === 0) {
+      showToast("请选择图片文件", "warning");
+      return;
+    }
+    setCroppedBlobs([]);
+    setCropQueue(arr);
+    setCropIndex(0);
+  };
+
+  // 裁剪完一张：累积 blob，到末张后统一上传
+  const handleCropConfirm = (blob: Blob) => {
+    const next = [...croppedBlobs, blob];
+    setCroppedBlobs(next);
+    if (cropSrcRef.current) { URL.revokeObjectURL(cropSrcRef.current); cropSrcRef.current = ''; }
+    if (cropIndex + 1 < cropQueue.length) {
+      setCropIndex(cropIndex + 1);
+    } else {
+      // 全部裁剪完毕，统一上传
+      setCropQueue([]);
+      setCropIndex(0);
+      uploadCropped(next);
+    }
+  };
+
+  // 取消整批裁剪
+  const handleCropCancel = () => {
+    if (cropSrcRef.current) { URL.revokeObjectURL(cropSrcRef.current); cropSrcRef.current = ''; }
+    setCropQueue([]);
+    setCropIndex(0);
+    setCroppedBlobs([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  // 上传裁剪后的 blob 列表
+  const uploadCropped = async (blobs: Blob[]) => {
     const picUrl = (siteConfig as any).picBedUrl || "https://pic.dusays.com";
     const picToken = (siteConfig as any).picBedToken;
     if (!picToken) { showToast("未配置图床 Token！", "error"); return; }
     setIsUploading(true);
-    showToast(`正在上传 ${files.length} 张图片...`, "info");
+    showToast(`正在上传 ${blobs.length} 张图片...`, "info");
     try {
       const configRes = await fetch(`/backend_config.json?t=${Date.now()}`);
       const configData = await configRes.json();
       const newUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
+      for (let i = 0; i < blobs.length; i++) {
+        const blob = blobs[i];
+        const ext = blob.type === 'image/png' ? 'png' : blob.type === 'image/webp' ? 'webp' : 'jpg';
         const uploadData = new FormData();
-        uploadData.append('file', files[i]);
+        uploadData.append('file', new File([blob], `moment-cropped-${Date.now()}-${i}.${ext}`, { type: blob.type }));
         uploadData.append('url', picUrl);
         uploadData.append('token', picToken);
         const res = await fetch(`http://127.0.0.1:${configData.api_port}/api/picbed/upload`, {
@@ -112,6 +173,7 @@ export default function MomentList({ moments, authorName, avatarUrl }: any) {
     } finally {
       setIsUploading(false);
       setIsDragging(false);
+      setCroppedBlobs([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
@@ -448,14 +510,25 @@ export default function MomentList({ moments, authorName, avatarUrl }: any) {
               </div>
 
               <div className="flex flex-col gap-4 mb-6">
+                {cropQueue.length > 0 && cropSrc ? (
+                  <ImageCropper
+                    key={cropIndex}
+                    src={cropSrc}
+                    aspectRatio={1}
+                    onConfirm={handleCropConfirm}
+                    onCancel={handleCropCancel}
+                    title={`裁剪第 ${cropIndex + 1} / ${cropQueue.length} 张`}
+                  />
+                ) : (
+                  <>
                 <div
                   onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                   onClick={() => fileInputRef.current?.click()}
                   className={`w-full border-2 border-dashed rounded-2xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all ${
-                    isDragging 
-                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20' 
+                    isDragging
+                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/20'
                       : 'border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
@@ -489,6 +562,8 @@ export default function MomentList({ moments, authorName, avatarUrl }: any) {
                     添加
                   </button>
                 </div>
+                  </>
+                )}
               </div>
 
               {newMoment.images.length > 0 && (

@@ -158,6 +158,7 @@ export default function EditorClient({ historyPostTags, historyChatterTags, hist
       <FloatingImageTool
         isOpen={isImgToolOpen}
         onClose={() => setIsImgToolOpen(false)}
+        aspectRatio={imgToolTarget === 'cover' ? 16/9 : null}
         onInsert={(url) => {
           if (imgToolTarget === 'editor') {
             editorRef.current?.insertImage(url);

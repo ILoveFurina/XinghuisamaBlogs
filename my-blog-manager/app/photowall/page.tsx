@@ -63,6 +63,7 @@ export default function PhotoWallPage() {
         key={isImgToolOpen ? 'tool-open' : 'tool-closed'}
         isOpen={isImgToolOpen}
         onClose={() => setIsImgToolOpen(false)}
+        aspectRatio={imgToolTarget === 'album' ? 4/3 : null}
         onInsert={(url) => {
           if (imgToolTarget === 'album') {
             setAlbumModal(prev => ({ ...prev, data: { ...prev.data, cover: url } }));

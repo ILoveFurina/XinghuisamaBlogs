@@ -242,7 +242,7 @@ function EditorContent() {
           </aside>
         </main>
       </PageTransition>
-      <FloatingImageTool isOpen={isImgToolOpen} onClose={() => setIsImgToolOpen(false)} onInsert={(url) => {
+      <FloatingImageTool isOpen={isImgToolOpen} onClose={() => setIsImgToolOpen(false)} aspectRatio={imgToolTarget === 'cover' ? 16/9 : null} onInsert={(url) => {
         if (imgToolTarget === 'editor') { editorRef.current?.insertImage(url); if (!cover) setCover(url); }
         else { setCover(url); setIsImgToolOpen(false); }
         setHasUnsavedChanges(true);

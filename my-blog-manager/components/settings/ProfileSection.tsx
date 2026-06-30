@@ -193,6 +193,7 @@ export default function ProfileSection({ formData, handleUpdate, pushToQueue }: 
       <FloatingImageTool
         isOpen={isImageToolOpen}
         onClose={() => setIsImageToolOpen(false)}
+        aspectRatio={1}
         onInsert={handleImageInsert}
       />
     </>
