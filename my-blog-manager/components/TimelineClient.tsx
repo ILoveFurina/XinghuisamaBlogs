@@ -13,8 +13,8 @@ export default function TimelineClient({ posts: initialPosts, tags }: { posts: a
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // 🌟 核心状态：视图模式 ('timeline' | 'card')
-  const [viewMode, setViewMode] = useState<'timeline' | 'card'>('timeline');
+  // 🌟 核心状态：视图模式 ('timeline' | 'card')，默认显示矩阵网格
+  const [viewMode, setViewMode] = useState<'timeline' | 'card'>('card');
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
